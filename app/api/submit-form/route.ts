@@ -40,7 +40,6 @@ export async function POST(request: NextRequest) {
         timestamp,
       };
       
-      // Проверяем дубликат по Telegram
       if (mediaBuyingData.telegram) {
         const isDuplicate = await googleSheetsService.checkDuplicate(
           spreadsheetId, 
