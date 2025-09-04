@@ -2,7 +2,6 @@
 
 import { useState } from 'react';
 import RadioButtonGroup from './RadioButtonGroup';
-import DynamicFormFields from './DynamicFormFields';
 
 interface FormWithStateProps {
   t: (key: string) => string;
