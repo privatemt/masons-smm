@@ -37,6 +37,7 @@ interface InteractiveFormProps {
         termsPlaceholder: string;
         description: string;
         descriptionPlaceholder: string;
+        suggest: string;
       };
       submit: string;
       recaptcha: string;
@@ -479,7 +480,7 @@ export default function InteractiveForm({ messages }: InteractiveFormProps) {
           <div className="space-y-4">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                {messages.form.fields.fullName}
+                {messages.form.fields.contacts}
               </label>
               <input
                 type="text"
@@ -493,7 +494,7 @@ export default function InteractiveForm({ messages }: InteractiveFormProps) {
 
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                {messages.form.fields.description}
+                {messages.form.fields.suggest}
               </label>
               <textarea
                 value={formData.description}
