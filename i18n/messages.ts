@@ -2,7 +2,7 @@
 export const messages = {
   en: {
     common: {
-      title: "MASONS PARTNERS - MEDIA BUYING HUB",
+      title: "MASONS PARTNERS -",
       title2: "MEDIA BUYING HUB",
       description: "Professional media buying services",
       language: "Language"
