@@ -25,9 +25,6 @@ export default function FormWithState({ t }: FormWithStateProps) {
         />
       </div>
 
-      {/* Динамические поля формы */}
-      <DynamicFormFields userType={selectedUserType} t={t} />
-
       {/* reCAPTCHA */}
       <div className="space-y-2">
         <div className="flex items-center space-x-3">
