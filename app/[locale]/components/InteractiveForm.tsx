@@ -357,19 +357,6 @@ export default function InteractiveForm({ messages }: InteractiveFormProps) {
 
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
-                {messages.form.fields.niche}
-              </label>
-              <input
-                type="text"
-                value={formData.niche}
-                onChange={(e) => handleInputChange('niche', e.target.value)}
-                placeholder={messages.form.fields.nichePlaceholder}
-                className="w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
                 {messages.form.fields.vertical}
               </label>
               <input
