@@ -66,7 +66,7 @@ export const messages = {
     form: {
       title: "Оставьте заявку и мы свяжемся с вами",
       userTypes: {
-        mediaBuying: "Хочу в команду",
+        mediaBuying: "Медиабаинговая команда",
         advertiser: "Рекламодатель",
         serviceRep: "Представитель сервиса",
         other: "Другое"
