@@ -1,0 +1,24 @@
+{
+  "common": {
+    "title": "Создать Next App",
+    "description": "Сгенерировано Masons Partners",
+    "getStarted": "Начните с редактирования",
+    "saveChanges": "Сохраните и увидите изменения мгновенно",
+    "deployNow": "Развернуть сейчас",
+    "readDocs": "Читать документацию",
+    "learn": "Изучить",
+    "examples": "Примеры",
+    "goToNextjs": "Перейти на nextjs.org →",
+    "language": "Язык"
+  },
+  "navigation": {
+    "home": "Главная",
+    "about": "О нас",
+    "contact": "Контакты"
+  },
+  "footer": {
+    "learn": "Изучить",
+    "examples": "Примеры",
+    "goToNextjs": "Перейти на nextjs.org →"
+  }
+}
