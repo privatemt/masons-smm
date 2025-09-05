@@ -39,7 +39,8 @@ export const messages = {
           terms: "Terms",
           termsPlaceholder: "Terms",
         description: "Description",
-        descriptionPlaceholder: "Tell us about your needs"
+        descriptionPlaceholder: "Tell us about your needs",
+        suggest: "Your suggestion"
       },
       submit: "Send",
       recaptcha: "I'm not a robot",
