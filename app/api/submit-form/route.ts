@@ -9,7 +9,25 @@ import {
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json();
+    const formData = await request.formData();
+    
+    // Извлекаем данные из FormData
+    const body = {
+      userType: formData.get('userType') as string,
+      fullName: formData.get('fullName') as string,
+      telegram: formData.get('telegram') as string,
+      teamName: formData.get('teamName') as string,
+      niche: formData.get('niche') as string,
+      vertical: formData.get('vertical') as string,
+      trafficSources: formData.get('trafficSources') as string,
+      brand: formData.get('brand') as string,
+      geolocation: formData.get('geolocation') as string,
+      contacts: formData.get('contacts') as string,
+      service: formData.get('service') as string,
+      terms: formData.get('terms') as string,
+      description: formData.get('description') as string,
+      photos: formData.getAll('photos') as File[]
+    };
     
     // Валидация - проверяем что есть хотя бы одно заполненное поле
     const hasRequiredFields = body.fullName || body.brand || body.service || body.contacts || body.telegram;
@@ -29,6 +47,39 @@ export async function POST(request: NextRequest) {
 
     // Отправляем данные в зависимости от типа пользователя
     if (body.userType === 'mediaBuying') {
+      // Обрабатываем фотографии
+      let photosFolderLink = '';
+      
+      if (body.photos && body.photos.length > 0) {
+        try {
+          
+          // Создаем папку пользователя в Dropbox
+          const userFolderPath = await googleSheetsService.createUserFolder({
+            fullName: body.fullName || '',
+            telegram: body.telegram || '',
+            timestamp
+          });
+          
+          
+          // Загружаем фотографии в папку пользователя
+          await googleSheetsService.uploadPhotosToUserFolder(userFolderPath, body.photos);
+          
+          // Получаем ссылку на папку
+          photosFolderLink = await googleSheetsService.getFolderLink(userFolderPath);
+        } catch (error: any) {
+          console.error('Error processing photos:', error);
+          console.error('Full error details:', {
+            message: error.message,
+            status: error.status,
+            code: error.code,
+            errors: error.errors,
+            stack: error.stack
+          });
+          // Продолжаем выполнение даже если есть ошибка с фотографиями
+          photosFolderLink = 'Error uploading photos';
+        }
+      }
+      
       const mediaBuyingData: MediaBuyingData = {
         userType: body.userType,
         fullName: body.fullName || '',
@@ -37,6 +88,7 @@ export async function POST(request: NextRequest) {
         niche: body.niche || '',
         vertical: body.vertical || '',
         trafficSources: body.trafficSources || '',
+        photosFolderLink,
         timestamp,
       };
       

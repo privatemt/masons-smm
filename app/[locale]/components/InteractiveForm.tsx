@@ -25,6 +25,8 @@ interface InteractiveFormProps {
         verticalPlaceholder: string;
         trafficSources: string;
         trafficSourcesPlaceholder: string;
+        photos: string;
+        photosPlaceholder: string;
         brand: string;
         brandPlaceholder: string;
         geolocation: string;
@@ -54,6 +56,7 @@ interface FormData {
   niche: string;
   vertical: string;
   trafficSources: string;
+  photos: File[];
   brand: string;
   geolocation: string;
   contacts: string;
@@ -72,6 +75,7 @@ export default function InteractiveForm({ messages }: InteractiveFormProps) {
     niche: '',
     vertical: '',
     trafficSources: '',
+    photos: [],
     brand: '',
     geolocation: '',
     contacts: '',
@@ -97,6 +101,13 @@ export default function InteractiveForm({ messages }: InteractiveFormProps) {
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleFileChange = (files: FileList | null) => {
+    if (files) {
+      const fileArray = Array.from(files);
+      setFormData(prev => ({ ...prev, photos: fileArray }));
+    }
+  };
+
   const showModal = (title: string, message: string, type: 'success' | 'error' | 'warning') => {
     setModalData({ title, message, type });
     setModalOpen(true);
@@ -113,29 +124,32 @@ export default function InteractiveForm({ messages }: InteractiveFormProps) {
     setSubmitStatus('idle');
 
     try {
-      // Подготавливаем данные для отправки - отправляем все поля отдельно
-      const submitData = {
-        userType: formData.userType,
-        fullName: formData.fullName,
-        telegram: formData.telegram,
-        teamName: formData.teamName,
-        niche: formData.niche,
-        vertical: formData.vertical,
-        trafficSources: formData.trafficSources,
-        brand: formData.brand,
-        geolocation: formData.geolocation,
-        contacts: formData.contacts,
-        service: formData.service,
-        terms: formData.terms,
-        description: formData.description
-      };
+      // Подготавливаем данные для отправки
+      const formDataToSend = new FormData();
+      
+      // Добавляем все текстовые поля
+      formDataToSend.append('userType', formData.userType);
+      formDataToSend.append('fullName', formData.fullName);
+      formDataToSend.append('telegram', formData.telegram);
+      formDataToSend.append('teamName', formData.teamName);
+      formDataToSend.append('niche', formData.niche);
+      formDataToSend.append('vertical', formData.vertical);
+      formDataToSend.append('trafficSources', formData.trafficSources);
+      formDataToSend.append('brand', formData.brand);
+      formDataToSend.append('geolocation', formData.geolocation);
+      formDataToSend.append('contacts', formData.contacts);
+      formDataToSend.append('service', formData.service);
+      formDataToSend.append('terms', formData.terms);
+      formDataToSend.append('description', formData.description);
+      
+      // Добавляем фотографии
+      formData.photos.forEach((photo, index) => {
+        formDataToSend.append(`photos`, photo);
+      });
 
       const response = await fetch('/api/submit-form', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(submitData),
+        body: formDataToSend,
       });
 
       if (response.ok) {
@@ -148,6 +162,7 @@ export default function InteractiveForm({ messages }: InteractiveFormProps) {
           niche: '',
           vertical: '',
           trafficSources: '',
+          photos: [],
           brand: '',
           geolocation: '',
           contacts: '',
@@ -381,6 +396,45 @@ export default function InteractiveForm({ messages }: InteractiveFormProps) {
                 className="w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm"
               />
             </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
+                {messages.form.fields.photos}
+              </label>
+              <div className="relative">
+                <input
+                  type="file"
+                  multiple
+                  accept="image/*"
+                  onChange={(e) => handleFileChange(e.target.files)}
+                  disabled={isSubmitting}
+                  className="w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed"
+                />
+                {isSubmitting && (
+                  <div className="absolute inset-0 bg-gray-800/80 rounded-lg flex items-center justify-center">
+                    <svg className="animate-spin h-5 w-5 text-red-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                      <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+                      <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                  </div>
+                )}
+              </div>
+              <p className="text-xs text-gray-400 mt-1">
+                {messages.form.fields.photosPlaceholder}
+              </p>
+              {formData.photos.length > 0 && (
+                <div className="mt-2">
+                  <p className="text-sm text-gray-300 mb-2">Выбранные файлы:</p>
+                  <div className="space-y-1">
+                    {formData.photos.map((file, index) => (
+                      <div key={index} className="text-xs text-gray-400 bg-gray-700/50 px-2 py-1 rounded">
+                        {file.name} ({(file.size / 1024 / 1024).toFixed(2)} MB)
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
@@ -524,8 +578,14 @@ export default function InteractiveForm({ messages }: InteractiveFormProps) {
         <button
           type="submit"
           disabled={isSubmitting}
-          className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white font-bold py-3 px-6 rounded-2xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-900"
+          className="w-full bg-red-600 hover:bg-red-700 disabled:bg-gray-600 text-white font-bold py-3 px-6 rounded-2xl transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2 focus:ring-offset-gray-900 flex items-center justify-center space-x-2"
         >
+          {isSubmitting && (
+            <svg className="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+          )}
           {isSubmitting ? 'Отправка...' : messages.form.submit}
         </button>
       </form>
