@@ -42,6 +42,9 @@ interface InteractiveFormProps {
         description: string;
         descriptionPlaceholder: string;
         suggest: string;
+        chooseFiles: string;
+        filesSelected: string;
+        noFileChosen: string;
       };
       submit: string;
       recaptcha: string;
@@ -208,7 +211,7 @@ export default function InteractiveForm({ messages }: InteractiveFormProps) {
     }
   };
 
-  // CSS для radio button'ов
+  // CSS для radio button'ов и file input
   const radioStyles = `
     input[type="radio"] {
       -webkit-appearance: none;
@@ -229,6 +232,7 @@ export default function InteractiveForm({ messages }: InteractiveFormProps) {
       background-color: transparent !important;
       border-color: #9FA5B7 !important;
     }
+    
   `;
 
   return (
@@ -426,16 +430,48 @@ export default function InteractiveForm({ messages }: InteractiveFormProps) {
 
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-2">
+                {messages.form.fields.additionalInfo} *
+              </label>
+              <textarea
+                required
+                value={formData.additionalInfo}
+                onChange={(e) => handleInputChange('additionalInfo', e.target.value)}
+                placeholder={messages.form.fields.additionalInfoPlaceholder}
+                rows={3}
+                className="w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm resize-none"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-2">
                 {messages.form.fields.photos} *
               </label>
-              <input
-                type="file"
-                required
-                multiple
-                accept="image/*"
-                onChange={(e) => handleInputChange('photos', e.target.files)}
-                className="w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-xl text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-red-600 file:text-white hover:file:bg-red-700"
-              />
+              <div className="relative">
+                <input
+                  type="file"
+                  required
+                  multiple
+                  accept="image/*"
+                  onChange={(e) => handleInputChange('photos', e.target.files)}
+                  className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                  id="file-input"
+                />
+                <div className="w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-xl text-white flex items-center">
+                  <button
+                    type="button"
+                    className="bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg text-sm transition-colors duration-200"
+                    onClick={() => document.getElementById('file-input')?.click()}
+                  >
+                    {messages.form.fields.chooseFiles}
+                  </button>
+                  <span className="ml-3 text-gray-300 text-sm">
+                    {formData.photos && formData.photos.length > 0 
+                      ? `${formData.photos.length} ${messages.form.fields.filesSelected}`
+                      : messages.form.fields.noFileChosen
+                    }
+                  </span>
+                </div>
+              </div>
               <p className="text-xs text-gray-400 mt-1">
                 {messages.form.fields.photosPlaceholder}
               </p>
@@ -451,20 +487,6 @@ export default function InteractiveForm({ messages }: InteractiveFormProps) {
                   </div>
                 </div>
               )}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-2">
-                {messages.form.fields.additionalInfo} *
-              </label>
-              <textarea
-                required
-                value={formData.additionalInfo}
-                onChange={(e) => handleInputChange('additionalInfo', e.target.value)}
-                placeholder={messages.form.fields.additionalInfoPlaceholder}
-                rows={3}
-                className="w-full px-3 py-2 bg-gray-800/50 border border-gray-600 rounded-xl text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent text-sm resize-none"
-              />
             </div>
           </div>
         )}

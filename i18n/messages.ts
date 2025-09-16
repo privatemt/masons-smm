@@ -34,7 +34,7 @@ export const messages = {
         additionalInfoPlaceholder: "Additional information",
         topGeo: "Top GEO",
         topGeoPlaceholder: "Top GEOs you worked with in the last 3 months",
-        photos: "Photos",
+        photos: "Attach file",
         photosPlaceholder: "Upload your photos (multiple files supported)",
                   brand: "Brand",
           brandPlaceholder: "Brand name",
@@ -48,7 +48,10 @@ export const messages = {
           termsPlaceholder: "Terms",
         description: "Description",
         descriptionPlaceholder: "Tell us about your needs",
-        suggest: "Your suggestion"
+        suggest: "Your suggestion",
+        chooseFiles: "Choose",
+        filesSelected: "file(s) selected",
+        noFileChosen: "No file chosen"
       },
       submit: "Send",
       recaptcha: "I'm not a robot",
@@ -99,7 +102,7 @@ export const messages = {
         additionalInfoPlaceholder: "Дополнительная информация",
         topGeo: "Топ GEO",
         topGeoPlaceholder: "Топ GEO, с которыми ты работал за последние 3 мес.",
-        photos: "Фотографии",
+        photos: "Прикрепить файл",
         photosPlaceholder: "Загрузите ваши фотографии (поддерживается несколько файлов)",
         brand: "Бренд",
         brandPlaceholder: "Название бренда",
@@ -113,7 +116,10 @@ export const messages = {
         termsPlaceholder: "Условия",
         description: "Описание",
         descriptionPlaceholder: "Расскажите о ваших потребностях",
-        suggest: "Ваше предложение"
+        suggest: "Ваше предложение",
+        chooseFiles: "Выбрать",
+        filesSelected: "файл(ов) выбрано",
+        noFileChosen: "Файл не выбран"
       },
       submit: "Отправить",
       recaptcha: "Я не робот",
