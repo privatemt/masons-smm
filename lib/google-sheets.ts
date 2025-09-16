@@ -6,9 +6,10 @@ export interface MediaBuyingData {
   fullName: string;
   telegram: string;
   teamName: string;
-  niche: string;
-  vertical: string;
   trafficSources: string;
+  networksAdvertisers: string;
+  additionalInfo: string;
+  topGeo1: string;
   photosFolderLink: string;
   timestamp: string;
 }
@@ -219,9 +220,10 @@ export class GoogleSheetsService {
           data.fullName,
           data.telegram,
           data.teamName,
-          data.niche,
-          data.vertical,
           data.trafficSources,
+          data.networksAdvertisers,
+          data.additionalInfo,
+          data.topGeo1,
           data.photosFolderLink, // Ссылка на папку с фотографиями
           data.timestamp,
         ],
@@ -229,7 +231,7 @@ export class GoogleSheetsService {
 
       const response = await this.sheets.spreadsheets.values.append({
         spreadsheetId,
-        range: 'Team!A:I', // Обновляем диапазон до столбца I
+        range: 'Team!A:J', // Обновляем диапазон до столбца J
         valueInputOption: 'USER_ENTERED',
         requestBody: {
           values,
