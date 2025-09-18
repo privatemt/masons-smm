@@ -1,6 +1,5 @@
 import { google } from 'googleapis';
-import { Dropbox } from 'dropbox';
-import fetch from 'cross-fetch'; 
+
 export interface MediaBuyingData {
   userType: string;
   fullName: string;
@@ -40,7 +39,6 @@ export interface OtherData {
 export class GoogleSheetsService {
   private auth: any;
   private sheets: any;
-  private dropbox: Dropbox;
 
   constructor() {
     // Аутентификация для Google Sheets
@@ -53,164 +51,9 @@ export class GoogleSheetsService {
       scopes: ['https://www.googleapis.com/auth/spreadsheets'],
     });
 
-    // Аутентификация для Dropbox
-    this.dropbox = new Dropbox({
-      accessToken: process.env.DROPBOX_ACCESS_TOKEN,
-      fetch
-    });
-
     this.sheets = google.sheets({ version: 'v4', auth: this.auth });
   }
 
-  // Получение или создание корневой папки MASONS_DATA в Dropbox
-  async getOrCreateRootFolder(): Promise<string> {
-    try {
-      
-      const rootFolderPath = '/MASONS_DATA';
-      
-      try {
-        const folderInfo = await this.dropbox.filesGetMetadata({
-          path: rootFolderPath,
-        });
-        return rootFolderPath;
-      } catch (error: any) {
-        if (error.status === 409) { // path_not_found
-          const createdFolder = await this.dropbox.filesCreateFolderV2({
-            path: rootFolderPath,
-            autorename: false,
-          });
-          return rootFolderPath;
-        } else {
-          console.error('Error accessing root folder:', error);
-          throw error;
-        }
-      }
-    } catch (error: any) {
-      console.error('Error accessing root folder:', error);
-      throw error;
-    }
-  }
-
-  // Создание папки пользователя
-  async createUserFolder(userData: { fullName: string; telegram: string; timestamp: string }): Promise<string> {
-    try {
-      
-      const rootFolderPath = await this.getOrCreateRootFolder();
-      
-      // Создаем уникальное имя папки
-      const folderName = `${userData.fullName}_${userData.telegram}_${new Date(userData.timestamp).toISOString().split('T')[0]}`;
-      const userFolderPath = `${rootFolderPath}/${folderName}`;
-      
-      // Проверяем, не существует ли уже такая папка
-      try {
-        const existingFolder = await this.dropbox.filesGetMetadata({
-          path: userFolderPath,
-        });
-        return userFolderPath;
-      } catch (error: any) {
-        if (error.status === 409) { // path_not_found
-          // Создаем папку пользователя
-          const folder = await this.dropbox.filesCreateFolderV2({
-            path: userFolderPath,
-            autorename: false,
-          });
-
-          return userFolderPath;
-        } else {
-          throw error;
-        }
-      }
-    } catch (error: any) {
-      console.error('Error creating user folder:', error);
-      console.error('Full error details:', {
-        message: error.message,
-        status: error.status,
-        code: error.code,
-        errors: error.errors,
-        stack: error.stack
-      });
-      throw error;
-    }
-  }
-
-  // Загрузка фотографий в папку пользователя
-  async uploadPhotosToUserFolder(folderPath: string, photos: File[]): Promise<string[]> {
-    try {
-      
-      const uploadedPhotoPaths: string[] = [];
-
-      for (let i = 0; i < photos.length; i++) {
-        const photo = photos[i];
-        
-        try {
-          const buffer = Buffer.from(await photo.arrayBuffer());
-          
-          const filePath = `${folderPath}/${photo.name}`;
-
-          const file = await this.dropbox.filesUpload({
-            path: filePath,
-            contents: buffer,
-            mode: { '.tag': 'overwrite' },
-          });
-
-          uploadedPhotoPaths.push(filePath);
-          
-        } catch (photoError: any) {
-          console.error(`Error uploading photo ${photo.name}:`, photoError);
-          console.error('Photo error details:', {
-            message: photoError.message,
-            status: photoError.status,
-            code: photoError.code,
-            errors: photoError.errors
-          });
-          throw photoError;
-        }
-      }
-
-      return uploadedPhotoPaths;
-    } catch (error: any) {
-      console.error('Error in uploadPhotosToUserFolder:', error);
-      console.error('Full error details:', {
-        message: error.message,
-        status: error.status,
-        code: error.code,
-        errors: error.errors,
-        stack: error.stack
-      });
-      throw error;
-    }
-  }
-
-  // Получение ссылки на папку
-  async getFolderLink(folderPath: string): Promise<string> {
-    try {
-      
-      const link = await this.dropbox.sharingCreateSharedLinkWithSettings({
-        path: folderPath,
-        settings: {
-          requested_visibility: { '.tag': 'public' },
-        },
-      });
-
-      return link.result.url;
-    } catch (error: any) {
-      console.error('Error getting folder link:', error);
-      // Если ссылка уже существует, получаем её
-      if (error.status === 409) {
-        try {
-          const existingLink = await this.dropbox.sharingListSharedLinks({
-            path: folderPath,
-          });
-          if (existingLink.result.links && existingLink.result.links.length > 0) {
-            return existingLink.result.links[0].url;
-          }
-        } catch (linkError) {
-          console.error('Error getting existing link:', linkError);
-        }
-      }
-      throw error;
-    }
-  }
 
   async appendMediaBuyingRow(spreadsheetId: string, data: MediaBuyingData) {
     try {
@@ -224,7 +67,7 @@ export class GoogleSheetsService {
           data.networksAdvertisers,
           data.additionalInfo,
           data.topGeo1,
-          data.photosFolderLink, // Ссылка на папку с фотографиями
+          data.photosFolderLink, // Ссылка на папку с фотографиями в MongoDB
           data.timestamp,
         ],
       ];

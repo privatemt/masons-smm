@@ -6,6 +6,7 @@ import {
   ServiceRepData, 
   OtherData 
 } from '../../../lib/google-sheets';
+import { mongodbService } from '../../../lib/mongodb';
 
 export async function POST(request: NextRequest) {
   try {
@@ -53,31 +54,51 @@ export async function POST(request: NextRequest) {
       
       if (body.photos && body.photos.length > 0) {
         try {
-          
-          // Создаем папку пользователя в Dropbox
-          const userFolderPath = await googleSheetsService.createUserFolder({
-            fullName: body.fullName || '',
-            telegram: body.telegram || '',
-            timestamp
-          });
-          
-          
-          // Загружаем фотографии в папку пользователя
-          await googleSheetsService.uploadPhotosToUserFolder(userFolderPath, body.photos);
-          
-          // Получаем ссылку на папку
-          photosFolderLink = await googleSheetsService.getFolderLink(userFolderPath);
+          // Фильтруем только валидные файлы
+          const validPhotos = body.photos.filter(photo => 
+            photo instanceof File && 
+            photo.size > 0 && 
+            photo.type.startsWith('image/')
+          );
+
+          if (validPhotos.length === 0) {
+            console.warn('No valid image files found');
+            photosFolderLink = 'No valid images to upload';
+          } else {
+            console.log(`Processing ${validPhotos.length} valid photos`);
+            
+            // Создаем папку пользователя в MongoDB и сохраняем фотографии
+            const folderId = await mongodbService.createUserPhotosFolder({
+              fullName: body.fullName || '',
+              telegram: body.telegram || '',
+              timestamp
+            }, validPhotos);
+            
+            // Получаем ссылку на папку
+            photosFolderLink = await mongodbService.getFolderLink(folderId);
+            console.log(`Successfully uploaded photos. Folder ID: ${folderId}`);
+          }
         } catch (error: any) {
           console.error('Error processing photos:', error);
           console.error('Full error details:', {
             message: error.message,
+            name: error.name,
             status: error.status,
             code: error.code,
             errors: error.errors,
             stack: error.stack
           });
-          // Продолжаем выполнение даже если есть ошибка с фотографиями
-          photosFolderLink = 'Error uploading photos';
+          
+          // Более информативное сообщение об ошибке
+          if (error.message?.includes('RangeError')) {
+            photosFolderLink = 'Error: Invalid image data';
+          } else if (error.message?.includes('timeout')) {
+            photosFolderLink = 'Error: Upload timeout';
+          } else if (error.message?.includes('GridFS')) {
+            photosFolderLink = 'Error: Database storage issue';
+          } else {
+            photosFolderLink = 'Error uploading photos';
+          }
         }
       }
       
