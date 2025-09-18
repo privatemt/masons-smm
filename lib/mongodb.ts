@@ -217,7 +217,7 @@ export class MongoDBService {
         downloadStream.on('data', (chunk) => {
           chunks.push(chunk);
         });
-        
+
         downloadStream.on('end', () => {
           resolve(Buffer.concat(chunks));
         });
