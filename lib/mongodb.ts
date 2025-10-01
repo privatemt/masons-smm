@@ -60,38 +60,31 @@ export class MongoDBService {
     return new GridFSBucket(this.db, { bucketName: 'photos' });
   }
 
-  // Создание папки пользователя и сохранение фотографий
   async createUserPhotosFolder(userData: { fullName: string; telegram: string; timestamp: string }, photos: File[]): Promise<string> {
     await this.connect();
     const collection = this.getPhotosCollection();
     const bucket = this.getGridFSBucket();
     
     try {
-      // Обрабатываем фотографии и сохраняем в GridFS
       const photosMetadata: PhotoMetadata[] = [];
       
       for (const photo of photos) {
         try {
-          // Проверяем размер файла
           if (photo.size === 0) {
             console.warn(`Skipping empty file: ${photo.name}`);
             continue;
           }
 
-          // Конвертируем файл в буфер
           const arrayBuffer = await photo.arrayBuffer();
           const buffer = Buffer.from(arrayBuffer);
           
-          // Проверяем что буфер не пустой
           if (buffer.length === 0) {
             console.warn(`Skipping empty buffer for file: ${photo.name}`);
             continue;
           }
 
-          // Создаем уникальное имя файла
           const fileName = `${userData.fullName}_${userData.telegram}_${Date.now()}_${photo.name}`;
           
-          // Создаем поток для записи в GridFS
           const uploadStream = bucket.openUploadStream(fileName, {
             metadata: {
               contentType: photo.type,
@@ -102,7 +95,6 @@ export class MongoDBService {
             }
           });
 
-          // Записываем данные в GridFS с улучшенной обработкой ошибок
           const gridFSId = await new Promise<string>((resolve, reject) => {
             uploadStream.on('error', (error) => {
               console.error(`GridFS upload error for file ${photo.name}:`, error);
@@ -113,8 +105,7 @@ export class MongoDBService {
               resolve(uploadStream.id.toString());
             });
 
-            // Записываем буфер по частям для больших файлов
-            const chunkSize = 255 * 1024; // 255KB chunks
+            const chunkSize = 255 * 1024;
             let offset = 0;
             
             const writeNextChunk = () => {
@@ -148,20 +139,16 @@ export class MongoDBService {
           
         } catch (photoError) {
           console.error(`Error processing photo ${photo.name}:`, photoError);
-          // Продолжаем обработку других файлов
           continue;
         }
       }
 
-      // Если нет успешно обработанных фотографий, все равно создаем запись
       if (photosMetadata.length === 0) {
         console.warn('No photos were successfully processed');
       }
 
-      // Создаем уникальный идентификатор папки
       const folderId = `${userData.fullName}_${userData.telegram}_${new Date(userData.timestamp).toISOString().split('T')[0]}`;
-      
-      // Сохраняем метаданные папки с фотографиями
+
       const userPhotosFolder: UserPhotosFolder = {
         userType: 'mediaBuying',
         fullName: userData.fullName,
@@ -173,8 +160,7 @@ export class MongoDBService {
       };
 
       const result = await collection.insertOne(userPhotosFolder);
-      
-      // Возвращаем ID записи как ссылку на папку
+
       return result.insertedId.toString();
     } catch (error) {
       console.error('Error creating user photos folder:', error);
@@ -199,6 +185,20 @@ export class MongoDBService {
     } catch (error) {
       console.error('Error getting user photos:', error);
       return null;
+    }
+  }
+
+  // Получение всех пользователей с фотографиями
+  async getAllUsers(): Promise<UserPhotosFolder[]> {
+    await this.connect();
+    const collection = this.getPhotosCollection();
+    
+    try {
+      const users = await collection.find({}).sort({ createdAt: -1 }).toArray();
+      return users as unknown as UserPhotosFolder[];
+    } catch (error) {
+      console.error('Error getting all users:', error);
+      return [];
     }
   }
 
