@@ -23,9 +23,7 @@ export class MongoDBService {
   private isConnected: boolean = false;
 
   constructor() {
-    const username = process.env.MONGODB_USERNAME || 'developmentis_db_user';
-    const password = process.env.MONGODB_PASSWORD || 'nBKwCcL5poFZUlGj';
-    const connectionString = `mongodb+srv://${username}:${password}@cluster0.beujzyd.mongodb.net/`;
+    const connectionString = process.env.CONSTR;
     
     this.client = new MongoClient(connectionString);
     this.db = this.client.db('masons_uploaded_data');
