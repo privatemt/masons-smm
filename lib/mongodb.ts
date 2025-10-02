@@ -25,7 +25,7 @@ export class MongoDBService {
   constructor() {
     const username = process.env.MONGODB_USERNAME || 'developmentis_db_user';
     const password = process.env.MONGODB_PASSWORD || 'nBKwCcL5poFZUlGj';
-    const connectionString = `mongodb+srv://${username}:${password}@cluster0.rbuxfxq.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0`;
+    const connectionString = `mongodb+srv://${username}:${password}@cluster0.beujzyd.mongodb.net/`;
     
     this.client = new MongoClient(connectionString);
     this.db = this.client.db('masons_uploaded_data');
