@@ -23,7 +23,7 @@ export class MongoDBService {
   private isConnected: boolean = false;
 
   constructor() {
-    const connectionString = process.env.CONSTR;
+    const connectionString = process.env.CONSTR!;
     
     this.client = new MongoClient(connectionString);
     this.db = this.client.db('masons_uploaded_data');
